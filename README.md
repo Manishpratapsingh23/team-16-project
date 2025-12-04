@@ -44,6 +44,7 @@ User / Reader
         View analytics: most-borrowed books, top contributors, trends
 
 *Tech Stack
+
         Frontend
             React + Vite, React Router, Axios, Socket.IO Client, TailwindCSS
 
@@ -51,5 +52,6 @@ User / Reader
             Node.js, Express, Socket.IO, JWT Authentication, MongoDB + Mongoose
 
 *Infrastructure
+
         Redis (caching + notifications)
-        Deployment: Bercel+render
+        Deployment: Vercel+render
