@@ -1,9 +1,13 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { BookProvider } from './context/BookContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { RequestProvider } from './context/RequestContext';
+
 import Layout from './components/Layout';
+
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import MyLibrary from './pages/MyLibrary';
@@ -12,10 +16,44 @@ import Requests from './pages/Requests';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
-/**
- * ProtectedRoute Component
- * Redirects to login if user is not authenticated
- */
+import './App.css';
+
+/* ---------------------------------------
+   Demo Data Setup (from varun-update)
+----------------------------------------*/
+function initializeDemoData() {
+  if (!localStorage.getItem('_demoInit')) {
+    localStorage.setItem('users', JSON.stringify([
+      { id: 'u1', name: 'Alice Johnson', email: 'alice@example.com', status: 'active' },
+      { id: 'u2', name: 'Bob Smith', email: 'bob@example.com', status: 'active' },
+      { id: 'u3', name: 'Carol White', email: 'carol@example.com', status: 'blocked' },
+      { id: 'u4', name: 'David Brown', email: 'david@example.com', status: 'active' }
+    ]));
+
+    localStorage.setItem('books', JSON.stringify([
+      { id: 'b1', title: '1984', author: 'George Orwell', ownerId: 'u1', status: 'available', genre: 'Dystopian Fiction' },
+      { id: 'b2', title: 'Sapiens', author: 'Yuval Noah Harari', ownerId: 'u2', status: 'lent', genre: 'History' },
+      { id: 'b3', title: 'To Kill a Mockingbird', author: 'Harper Lee', ownerId: 'u1', status: 'available', genre: 'Classic' },
+      { id: 'b4', title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', ownerId: 'u2', status: 'swap', genre: 'Classic' },
+      { id: 'b5', title: 'Atomic Habits', author: 'James Clear', ownerId: 'u3', status: 'available', genre: 'Self-Help' },
+      { id: 'b6', title: 'Dune', author: 'Frank Herbert', ownerId: 'u4', status: 'lent', genre: 'Science Fiction' }
+    ]));
+
+    localStorage.setItem('requests', JSON.stringify([
+      { id: 'r1', requesterId: 'u2', ownerId: 'u1', bookId: 'b1', status: 'pending' },
+      { id: 'r2', requesterId: 'u4', ownerId: 'u2', bookId: 'b2', status: 'approved' },
+      { id: 'r3', requesterId: 'u1', ownerId: 'u3', bookId: 'b5', status: 'rejected' },
+      { id: 'r4', requesterId: 'u3', ownerId: 'u4', bookId: 'b6', status: 'returned' }
+    ]));
+
+    localStorage.setItem('isAdmin', 'true');
+    localStorage.setItem('_demoInit', 'true');
+  }
+}
+
+/* ---------------------------------------
+   Protected Route
+----------------------------------------*/
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
@@ -33,10 +71,9 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
-/**
- * PublicRoute Component
- * Redirects to home if user is already authenticated
- */
+/* ---------------------------------------
+   Public Route
+----------------------------------------*/
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
@@ -54,19 +91,26 @@ const PublicRoute = ({ children }) => {
   return isAuthenticated ? <Navigate to="/" replace /> : children;
 };
 
-/**
- * App Component
- * Main application component with routing and context providers
- */
+/* ---------------------------------------
+   Main App
+----------------------------------------*/
 function App() {
+
+  // Load demo data only once
+  useEffect(() => {
+    initializeDemoData();
+  }, []);
+
   return (
     <Router>
       <AuthProvider>
         <BookProvider>
           <NotificationProvider>
             <RequestProvider>
+
               <Layout>
                 <Routes>
+
                   {/* Public Routes */}
                   <Route
                     path="/login"
@@ -76,6 +120,7 @@ function App() {
                       </PublicRoute>
                     }
                   />
+
                   <Route
                     path="/register"
                     element={
@@ -94,6 +139,7 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
+
                   <Route
                     path="/dashboard"
                     element={
@@ -102,6 +148,7 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
+
                   <Route
                     path="/my-library"
                     element={
@@ -110,6 +157,7 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
+
                   <Route
                     path="/book/:id"
                     element={
@@ -118,6 +166,7 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
+
                   <Route
                     path="/requests"
                     element={
@@ -127,10 +176,12 @@ function App() {
                     }
                   />
 
-                  {/* Fallback Route */}
+                  {/* fallback */}
                   <Route path="*" element={<Navigate to="/" replace />} />
+
                 </Routes>
               </Layout>
+
             </RequestProvider>
           </NotificationProvider>
         </BookProvider>
